@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Mode Interface</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Emergency Mode Interface</h1>
+        <button id="readEmergencyButton">Read NFC Tag</button>
+        <p id="emergencyMessage"></p>
+        <div id="emergencyData" class="hidden">
+            <h2>Patient Information</h2>
+            <p><strong>Full Name:</strong> <span id="emergencyFullName"></span></p>
+            <p><strong>Age:</strong> <span id="emergencyAge"></span></p>
+            <p><strong>Gender:</strong> <span id="emergencyGender"></span></p>
+            <p><strong>Blood Type:</strong> <span id="emergencyBloodType"></span></p>
+            <h2>Allergies</h2>
+            <p><strong>Drug Allergies:</strong> <span id="emergencyDrugAllergies"></span></p>
+            <p><strong>Food Allergies:</strong> <span id="emergencyFoodAllergies"></span></p>
+            <p><strong>Environmental Allergies:</strong> <span id="emergencyEnvironmentalAllergies"></span></p>
+            <h2>Chronic Conditions</h2>
+            <p><strong>Diabetes:</strong> <span id="emergencyDiabetes"></span></p>
+            <p><strong>Hypertension:</strong> <span id="emergencyHypertension"></span></p>
+            <p><strong>Asthma:</strong> <span id="emergencyAsthma"></span></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('readEmergencyButton').addEventListener('click', async () => {
+            if ('NDEFReader' in window) {
+                try {
+                    const ndef = new NDEFReader();
+                    await ndef.scan();
+                    ndef.onreading = event => {
+                        const decoder = new TextDecoder();
+                        let data = '';
+                        for (const record of event.message.records) {
+                            data += decoder.decode(record.data);
+                        }
+                        displayEmergencyData(JSON.parse(data));
+                    };
+                } catch (error) {
+                    document.getElementById('emergencyMessage').textContent = `Error: ${error}`;
+                }
+            } else {
+                document.getElementById('emergencyMessage').textContent = 'Web NFC is not supported on this device.';
+            }
+        });
+
+        function displayEmergencyData(data) {
+            document.getElementById('emergencyFullName').textContent = data.fullName;
+            document.getElementById('emergencyAge').textContent = data.age;
+            document.getElementById('emergencyGender').textContent = data.gender;
+            document.getElementById('emergencyBloodType').textContent = data.bloodType;
+            document.getElementById('emergencyDrugAllergies').textContent = data.drugAllergies;
+            document.getElementById('emergencyFoodAllergies').textContent = data.foodAllergies;
+            document.getElementById('emergencyEnvironmentalAllergies').textContent = data.environmentalAllergies;
+            document.getElementById('emergencyDiabetes').textContent = data.diabetes;
+            document.getElementById('emergencyHypertension').textContent = data.hypertension;
+            document.getElementById('emergencyAsthma').textContent = data.asthma;
+            document.getElementById('emergencyData').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
